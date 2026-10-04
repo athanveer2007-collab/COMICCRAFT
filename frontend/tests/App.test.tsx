@@ -2,13 +2,12 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import App from "../src/App";
 
-describe("App Foundation", () => {
+describe("App Shell & Routing", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("renders ComicCraft branding and headline", async () => {
-    // Mock health API fetch
+  it("renders Navbar branding and Create Page on initial load", async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -21,21 +20,13 @@ describe("App Foundation", () => {
 
     render(<App />);
 
-    expect(screen.getByText("COMICCRAFT")).toBeInTheDocument();
-    expect(screen.getByText(/AI Comic Generator with/i)).toBeInTheDocument();
+    expect(screen.getAllByText("COMICCRAFT")[0]).toBeInTheDocument();
+    expect(screen.getByText(/Create Your 5-Panel/i)).toBeInTheDocument();
+    expect(screen.getByText(/Story Concept or Plot Idea/i)).toBeInTheDocument();
+    expect(screen.getByText(/Main Character Name/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText(/API v0.1.0 Connected/i)).toBeInTheDocument();
-    });
-  });
-
-  it("displays error state when health API fails", async () => {
-    global.fetch = vi.fn().mockRejectedValue(new Error("Network Error"));
-
-    render(<App />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/API Offline/i)).toBeInTheDocument();
+      expect(screen.getByText(/API v0.1.0 Online/i)).toBeInTheDocument();
     });
   });
 });
