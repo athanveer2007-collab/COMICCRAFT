@@ -172,9 +172,25 @@ class GenerationService:
                     p_dict["image_url"] = f"/storage/images/{comic_id}/panel_{p.panel}.png"
                     final_panels.append(p_dict)
 
+                # Auto-generate PDF export
+                from app.export import pdf_exporter
+
+                pdf_file = pdf_exporter.generate_pdf(
+                    comic_id=comic_id,
+                    title=script.title,
+                    character_name=comic.character_name,
+                    setting=comic.setting,
+                    tone=comic.tone,
+                    art_style=comic.art_style,
+                    synopsis=script.synopsis,
+                    panels=final_panels,
+                    image_dir=comic_img_dir,
+                )
+
                 await comic_repo.update(
                     comic_id,
                     panels=final_panels,
+                    pdf_path=str(pdf_file),
                     status="completed",
                 )
 
