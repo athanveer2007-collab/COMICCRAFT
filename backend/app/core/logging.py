@@ -12,7 +12,7 @@ class StructuredFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         req_id = request_id_ctx_var.get()
-        record.request_id = req_id if req_id else "-"  # type: ignore[attr-defined]
+        record.request_id = req_id if req_id else "-"
         return super().format(record)
 
 

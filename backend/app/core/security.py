@@ -1,12 +1,10 @@
 """Security, CORS, and middleware utilities."""
 
 import uuid
-from collections.abc import Callable
-from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from app.core.config import settings
 from app.core.logging import request_id_ctx_var
@@ -15,7 +13,7 @@ from app.core.logging import request_id_ctx_var
 class RequestIDMiddleware(BaseHTTPMiddleware):
     """Middleware that assigns a unique request ID to each request and sets it in context."""
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Any]) -> Response:  # type: ignore[override]
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         req_id = request.headers.get("X-Request-ID") or f"req-{uuid.uuid4()}"
         token = request_id_ctx_var.set(req_id)
         try:
