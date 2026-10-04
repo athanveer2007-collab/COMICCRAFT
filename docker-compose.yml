@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: comiccraft-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - OUTLINE_MODEL=${OUTLINE_MODEL:-gemini-2.5-flash}
+      - STORY_MODEL=${STORY_MODEL:-gemini-2.5-flash}
+      - IMAGE_MODEL=${IMAGE_MODEL:-imagen-3.0-generate-002}
+      - IMAGE_PROVIDER=${IMAGE_PROVIDER:-gemini}
+      - DATABASE_URL=sqlite+aiosqlite:///app/storage/comiccraft.db
+      - STORAGE_DIR=/app/storage
+      - CORS_ORIGINS=http://localhost:8080,http://localhost:5173
+    volumes:
+      - comiccraft-storage:/app/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: comiccraft-frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  comiccraft-storage:
+    name: comiccraft-storage
